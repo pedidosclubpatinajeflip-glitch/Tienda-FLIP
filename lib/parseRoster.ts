@@ -70,7 +70,7 @@ function valorTexto(fila: Record<string, unknown>, columna: string | null) {
   return String(valor).trim();
 }
 
-// Convierte un archivo Excel (tal cual lo exporta Klubber) en una lista
+// Convierte un archivo Excel (tal cual lo exporta Clubber) en una lista
 // de patinadores. Es tolerante con los nombres de columna, y acepta tanto
 // una sola columna de nombre completo como columnas separadas de nombre y
 // apellidos (tanto del patinador como del tutor).

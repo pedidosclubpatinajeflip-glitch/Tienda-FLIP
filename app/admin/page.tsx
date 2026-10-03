@@ -142,7 +142,7 @@ function PanelAdmin() {
               Descargar CSV
             </a>
             <label className="bg-[var(--flip-black)] text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer">
-              {subiendo ? "Importando…" : "Actualizar listado (Excel Klubber)"}
+              {subiendo ? "Importando…" : "Actualizar listado (Excel Clubber)"}
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"

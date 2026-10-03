@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="flex flex-col gap-3">
           <input
             type="tel"
-            placeholder="Tu teléfono (el mismo que usas en Klubber)"
+            placeholder="Tu teléfono (el mismo que usas en Clubber)"
             className="border rounded-lg px-3 py-2"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}

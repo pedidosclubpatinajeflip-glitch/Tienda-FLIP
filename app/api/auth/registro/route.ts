@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const supabase = supabaseAdmin();
 
   // Buscamos a qué patinador/es corresponde este teléfono: el mismo que
-  // las familias ya usan para entrar en Klubber. Un mismo teléfono puede
+  // las familias ya usan para entrar en Clubber. Un mismo teléfono puede
   // tener más de un patinador/a (hermanos en el club).
   const { data: roster, error: rosterError } = await supabase
     .from("patinadores")
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "No encontramos ese número en el listado del club. Comprueba que sea el mismo que usas en Klubber, o contacta con el club si crees que es un error.",
+          "No encontramos ese número en el listado del club. Comprueba que sea el mismo que usas en Clubber, o contacta con el club si crees que es un error.",
       },
       { status: 400 }
     );

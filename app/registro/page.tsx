@@ -54,7 +54,7 @@ export default function RegistroPage() {
         </p>
         <h1 className="text-xl font-bold mb-1">Crear cuenta</h1>
         <p className="text-sm text-black/50 mb-5">
-          Usa el mismo número de teléfono con el que entras en Klubber.
+          Usa el mismo número de teléfono con el que entras en Clubber.
           Así asociamos automáticamente a tu hijo/a (o hijos/as) a tu
           cuenta.
         </p>
@@ -62,7 +62,7 @@ export default function RegistroPage() {
         <div className="flex flex-col gap-3">
           <input
             type="tel"
-            placeholder="Teléfono (el mismo que usas en Klubber)"
+            placeholder="Teléfono (el mismo que usas en Clubber)"
             className="border rounded-lg px-3 py-2"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
