@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST: reemplaza el listado de patinadores (usado desde /admin al subir
-// el Excel exportado de Clubber). Protegido con la contraseña de admin.
+// el Excel exportado de Cluber). Protegido con la contraseña de admin.
 export async function POST(req: NextRequest) {
   const adminCookie = req.cookies.get("flip_admin")?.value;
   if (!adminCookie || adminCookie !== process.env.ADMIN_PASSWORD) {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = supabaseAdmin();
 
-  // Sustituimos el listado completo por el nuevo Excel (Clubber es la
+  // Sustituimos el listado completo por el nuevo Excel (Cluber es la
   // fuente de la verdad): borramos y volvemos a insertar.
   const { error: delError } = await supabase
     .from("patinadores")

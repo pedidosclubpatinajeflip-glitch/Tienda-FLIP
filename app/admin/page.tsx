@@ -15,6 +15,13 @@ type Pedido = {
   total: number;
 };
 
+type Cuenta = {
+  id: string;
+  telefono: string;
+  creado_en: string;
+  patinadores: { nombre: string; grupo: string | null }[];
+};
+
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false);
   const [comprobando, setComprobando] = useState(true);
@@ -82,6 +89,12 @@ function PanelAdmin() {
   const [subiendo, setSubiendo] = useState(false);
   const [mensajeImport, setMensajeImport] = useState<string | null>(null);
 
+  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
+  const [cargandoCuentas, setCargandoCuentas] = useState(true);
+  const [idEnReset, setIdEnReset] = useState<string | null>(null);
+  const [nuevaPassword, setNuevaPassword] = useState("");
+  const [mensajeReset, setMensajeReset] = useState<string | null>(null);
+
   function cargarPedidos() {
     setCargando(true);
     fetch("/api/admin/orders")
@@ -90,7 +103,40 @@ function PanelAdmin() {
       .finally(() => setCargando(false));
   }
 
+  function cargarCuentas() {
+    setCargandoCuentas(true);
+    fetch("/api/admin/padres")
+      .then((r) => r.json())
+      .then((data) => setCuentas(data.cuentas || []))
+      .finally(() => setCargandoCuentas(false));
+  }
+
   useEffect(cargarPedidos, []);
+  useEffect(cargarCuentas, []);
+
+  async function restablecerPassword(id: string) {
+    setMensajeReset(null);
+    if (nuevaPassword.length < 6) {
+      setMensajeReset("La nueva contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/padres", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, nuevaPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMensajeReset("Contraseña actualizada. Díselo ya a la familia.");
+      setIdEnReset(null);
+      setNuevaPassword("");
+    } catch (err) {
+      setMensajeReset(
+        err instanceof Error ? err.message : "No se pudo cambiar la contraseña"
+      );
+    }
+  }
 
   async function subirExcel(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -142,7 +188,7 @@ function PanelAdmin() {
               Descargar CSV
             </a>
             <label className="bg-[var(--flip-black)] text-white rounded-lg px-4 py-2 text-sm font-medium cursor-pointer">
-              {subiendo ? "Importando…" : "Actualizar listado (Excel Clubber)"}
+              {subiendo ? "Importando…" : "Actualizar listado (Excel Cluber)"}
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -229,6 +275,96 @@ function PanelAdmin() {
                     </td>
                     <td className="p-3 font-medium whitespace-nowrap">
                       {Number(p.total).toFixed(2)}€
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <h2 className="text-xl font-bold mt-10 mb-4">Cuentas registradas</h2>
+        <p className="text-sm text-black/50 mb-4">
+          Aquí ves todas las cuentas de padres/tutores que se han registrado
+          en la web, con el patinador/a (o patinadores/as) asociado a cada
+          una. Si un padre dice que ha olvidado la contraseña, búscalo por
+          teléfono y pulsa "Restablecer contraseña" para ponerle una nueva
+          que luego le pasas tú.
+        </p>
+
+        {mensajeReset && (
+          <p className="text-sm bg-white border rounded-lg p-3 mb-4">{mensajeReset}</p>
+        )}
+
+        {cargandoCuentas ? (
+          <p className="text-black/50">Cargando cuentas…</p>
+        ) : cuentas.length === 0 ? (
+          <p className="text-black/50">Todavía no se ha registrado ninguna cuenta.</p>
+        ) : (
+          <div className="bg-white rounded-xl border overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-black/[.03] text-left">
+                <tr>
+                  <th className="p-3">Teléfono</th>
+                  <th className="p-3">Patinador/es</th>
+                  <th className="p-3">Fecha de alta</th>
+                  <th className="p-3">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cuentas.map((c) => (
+                  <tr key={c.id} className="border-t align-top">
+                    <td className="p-3 whitespace-nowrap font-medium">{c.telefono}</td>
+                    <td className="p-3">
+                      {c.patinadores?.map((p, i) => (
+                        <div key={i}>
+                          {p.nombre}
+                          {p.grupo && <span className="text-black/40"> ({p.grupo})</span>}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {new Date(c.creado_en).toLocaleDateString("es-ES")}
+                    </td>
+                    <td className="p-3">
+                      {idEnReset === c.id ? (
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <input
+                            type="text"
+                            autoFocus
+                            placeholder="Nueva contraseña"
+                            className="border rounded-lg px-2 py-1 text-sm"
+                            value={nuevaPassword}
+                            onChange={(e) => setNuevaPassword(e.target.value)}
+                          />
+                          <button
+                            onClick={() => restablecerPassword(c.id)}
+                            className="bg-[var(--flip-black)] text-white rounded-lg px-3 py-1 text-xs font-medium"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIdEnReset(null);
+                              setNuevaPassword("");
+                            }}
+                            className="text-xs text-black/50"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setIdEnReset(c.id);
+                            setNuevaPassword("");
+                            setMensajeReset(null);
+                          }}
+                          className="text-xs text-[var(--flip-pink-dark)] font-medium underline"
+                        >
+                          Restablecer contraseña
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

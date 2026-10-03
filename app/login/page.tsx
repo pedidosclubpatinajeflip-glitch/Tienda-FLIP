@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="flex flex-col gap-3">
           <input
             type="tel"
-            placeholder="Tu teléfono (el mismo que usas en Clubber)"
+            placeholder="Tu teléfono (el mismo que usas en Cluber)"
             className="border rounded-lg px-3 py-2"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
@@ -74,6 +74,10 @@ export default function LoginPage() {
           <Link href="/registro" className="text-[var(--flip-pink-dark)] font-medium">
             Regístrate
           </Link>
+        </p>
+        <p className="text-xs text-center text-black/40 mt-2">
+          ¿Has olvidado la contraseña? Escribe al club (
+          pedidos.clubpatinajeflip@gmail.com) y te la restablecen.
         </p>
       </div>
     </div>

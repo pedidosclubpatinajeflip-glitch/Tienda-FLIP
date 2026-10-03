@@ -200,7 +200,8 @@ function ProductoCard({
   producto: Producto;
   onAdd: (item: ItemCarrito) => void;
 }) {
-  const [talla, setTalla] = useState("");
+  const tallaUnica = producto.tallas.length === 1;
+  const [talla, setTalla] = useState(tallaUnica ? producto.tallas[0] : "");
   const [color, setColor] = useState(producto.colores?.[0] ?? "");
   const [personalizacion, setPersonalizacion] = useState("");
   const [cantidad, setCantidad] = useState(1);
@@ -209,6 +210,10 @@ function ProductoCard({
   function handleAdd() {
     if (!talla) {
       setAviso("Elige una talla");
+      return;
+    }
+    if (producto.personalizacionObligatoria && !personalizacion.trim()) {
+      setAviso("Indica el nombre a bordar (es obligatorio en este artículo)");
       return;
     }
     setAviso(null);
@@ -222,7 +227,7 @@ function ProductoCard({
       cantidad,
       precioUnitario: producto.precio,
     });
-    setTalla("");
+    setTalla(tallaUnica ? producto.tallas[0] : "");
     setPersonalizacion("");
     setCantidad(1);
   }
@@ -246,18 +251,24 @@ function ProductoCard({
         </div>
         <p className="text-xs text-black/60">{producto.descripcion}</p>
 
-        <select
-          className="border rounded-lg px-2 py-1.5 text-sm mt-1"
-          value={talla}
-          onChange={(e) => setTalla(e.target.value)}
-        >
-          <option value="">Talla</option>
-          {producto.tallas.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
+        {tallaUnica ? (
+          <p className="text-sm text-black/60 mt-1">
+            Talla: <span className="font-medium">{producto.tallas[0]}</span>
+          </p>
+        ) : (
+          <select
+            className="border rounded-lg px-2 py-1.5 text-sm mt-1"
+            value={talla}
+            onChange={(e) => setTalla(e.target.value)}
+          >
+            <option value="">Talla</option>
+            {producto.tallas.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        )}
 
         {producto.colores && (
           <select
@@ -276,7 +287,11 @@ function ProductoCard({
         {producto.personalizable && (
           <input
             className="border rounded-lg px-2 py-1.5 text-sm"
-            placeholder="Nombre a bordar (opcional)"
+            placeholder={
+              producto.personalizacionObligatoria
+                ? "Nombre a bordar (obligatorio)"
+                : "Nombre a bordar (opcional)"
+            }
             value={personalizacion}
             onChange={(e) => setPersonalizacion(e.target.value)}
             maxLength={20}
@@ -285,14 +300,17 @@ function ProductoCard({
 
         <div className="flex items-center gap-2 mt-1">
           <label className="text-sm text-black/60">Cantidad</label>
-          <input
-            type="number"
-            min={1}
-            max={10}
+          <select
             value={cantidad}
-            onChange={(e) => setCantidad(Math.max(1, Number(e.target.value)))}
-            className="border rounded-lg px-2 py-1 w-16 text-sm"
-          />
+            onChange={(e) => setCantidad(Number(e.target.value))}
+            className="border rounded-lg px-2 py-1 text-sm"
+          >
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
         </div>
 
         {aviso && <p className="text-xs text-red-600">{aviso}</p>}

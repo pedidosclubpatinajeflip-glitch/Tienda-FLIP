@@ -10,6 +10,7 @@ export type Producto = {
   tallas: string[];
   imagen: string; // ruta dentro de /public
   personalizable: boolean; // si se puede pedir con nombre bordado
+  personalizacionObligatoria?: boolean; // si el nombre bordado es obligatorio (no opcional)
   colores?: string[]; // si el artículo tiene variantes de color
 };
 
@@ -31,6 +32,7 @@ export const catalogo: Producto[] = [
     tallas: ["6", "8", "10", "12", "XS", "S", "M", "L", "XL"],
     imagen: "/productos/02-chaqueta.png",
     personalizable: true,
+    personalizacionObligatoria: true,
   },
   {
     id: "mallas-termicas",
@@ -86,6 +88,7 @@ export const catalogo: Producto[] = [
     tallas: ["5-6", "7-8", "9-10", "11-12", "S", "M", "L", "XL", "XXL"],
     imagen: "/productos/09-sudadera.png",
     personalizable: true,
+    personalizacionObligatoria: true,
   },
   {
     id: "parka",
