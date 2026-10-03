@@ -6,31 +6,17 @@ import { useRouter } from "next/navigation";
 
 export default function RegistroPage() {
   const router = useRouter();
-  const [nombres, setNombres] = useState<string[]>([""]);
-  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  function actualizarNombre(i: number, valor: string) {
-    setNombres((prev) => prev.map((n, idx) => (idx === i ? valor : n)));
-  }
-
-  function anadirPatinador() {
-    setNombres((prev) => [...prev, ""]);
-  }
-
-  function quitarPatinador(i: number) {
-    setNombres((prev) => prev.filter((_, idx) => idx !== i));
-  }
-
   async function registrar() {
     setError(null);
 
-    const nombresLimpios = nombres.map((n) => n.trim()).filter(Boolean);
-    if (nombresLimpios.length === 0) {
-      setError("Indica el nombre de al menos un patinador/a.");
+    if (telefono.replace(/\D/g, "").length < 9) {
+      setError("Introduce un número de teléfono válido.");
       return;
     }
     if (password.length < 6) {
@@ -47,7 +33,7 @@ export default function RegistroPage() {
       const res = await fetch("/api/auth/registro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, patinadores: nombresLimpios }),
+        body: JSON.stringify({ telefono, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo completar el registro");
@@ -68,46 +54,19 @@ export default function RegistroPage() {
         </p>
         <h1 className="text-xl font-bold mb-1">Crear cuenta</h1>
         <p className="text-sm text-black/50 mb-5">
-          Escribe el nombre de tu hijo/a. Si tienes más de un hijo/a en el
-          club, añade uno por cada uno.
+          Usa el mismo número de teléfono con el que entras en Klubber.
+          Así asociamos automáticamente a tu hijo/a (o hijos/as) a tu
+          cuenta.
         </p>
-
-        <div className="flex flex-col gap-2 mb-2">
-          {nombres.map((nombre, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                className="border rounded-lg px-3 py-2 flex-1"
-                placeholder="Nombre y apellido del patinador/a"
-                value={nombre}
-                onChange={(e) => actualizarNombre(i, e.target.value)}
-              />
-              {nombres.length > 1 && (
-                <button
-                  onClick={() => quitarPatinador(i)}
-                  className="text-red-500 text-sm px-2"
-                  type="button"
-                >
-                  Quitar
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={anadirPatinador}
-          type="button"
-          className="text-sm text-[var(--flip-pink-dark)] font-medium mb-4"
-        >
-          + Añadir otro hijo/a
-        </button>
 
         <div className="flex flex-col gap-3">
           <input
-            type="email"
-            placeholder="Tu email (será tu usuario)"
+            type="tel"
+            placeholder="Teléfono (el mismo que usas en Klubber)"
             className="border rounded-lg px-3 py-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            autoFocus
           />
           <input
             type="password"

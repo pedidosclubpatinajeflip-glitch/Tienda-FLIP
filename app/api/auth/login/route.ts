@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, supabaseConfigured } from "@/lib/supabase";
 import { verifyPassword, generarTokenSesion } from "@/lib/auth";
+import { normalizaTelefono } from "@/lib/text";
 
 export async function POST(req: NextRequest) {
   if (!supabaseConfigured()) {
@@ -10,10 +11,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { email, password } = await req.json();
-  if (!email || !password) {
+  const { telefono: telefonoRaw, password } = await req.json();
+  const telefono = normalizaTelefono(telefonoRaw || "");
+  if (!telefono || !password) {
     return NextResponse.json(
-      { error: "Introduce tu email y tu contraseña." },
+      { error: "Introduce tu número de teléfono y tu contraseña." },
       { status: 400 }
     );
   }
@@ -22,12 +24,12 @@ export async function POST(req: NextRequest) {
   const { data: padre } = await supabase
     .from("padres")
     .select("id, password_hash")
-    .ilike("email", String(email).trim())
+    .eq("telefono", telefono)
     .maybeSingle();
 
   if (!padre || !verifyPassword(password, padre.password_hash)) {
     return NextResponse.json(
-      { error: "Email o contraseña incorrectos." },
+      { error: "Teléfono o contraseña incorrectos." },
       { status: 401 }
     );
   }

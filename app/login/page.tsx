@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -18,7 +18,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ telefono, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo iniciar sesión");
@@ -41,12 +41,13 @@ export default function LoginPage() {
 
         <div className="flex flex-col gap-3">
           <input
-            type="email"
-            placeholder="Tu email"
+            type="tel"
+            placeholder="Tu teléfono (el mismo que usas en Klubber)"
             className="border rounded-lg px-3 py-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && entrar()}
+            autoFocus
           />
           <input
             type="password"

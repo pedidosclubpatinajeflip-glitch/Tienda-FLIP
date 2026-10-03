@@ -113,7 +113,7 @@ function PanelAdmin() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setMensajeImport(
-        `Importados ${data.importados} patinadores. Columnas detectadas: nombre="${columnasDetectadas.nombre}", grupo="${columnasDetectadas.grupo ?? "—"}".`
+        `Importados ${data.importados} patinadores. Columnas detectadas: nombre="${columnasDetectadas.nombre}", grupo="${columnasDetectadas.grupo ?? "—"}", teléfono="${columnasDetectadas.telefono ?? "—"}". Si el teléfono sale como "—", revisa que el Excel tenga una columna de teléfono del tutor: sin eso, nadie podrá registrarse.`
       );
     } catch (err) {
       setMensajeImport(

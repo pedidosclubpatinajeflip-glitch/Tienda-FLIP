@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, supabaseConfigured } from "@/lib/supabase";
 import { hashPassword, generarTokenSesion } from "@/lib/auth";
-import { normaliza } from "@/lib/text";
+import { normalizaTelefono } from "@/lib/text";
 
 export async function POST(req: NextRequest) {
   if (!supabaseConfigured()) {
@@ -12,14 +12,14 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const email: string = (body.email || "").trim().toLowerCase();
+  const telefono = normalizaTelefono(body.telefono || "");
   const password: string = body.password || "";
-  const nombresPatinadores: string[] = (body.patinadores || [])
-    .map((n: string) => (n || "").trim())
-    .filter(Boolean);
 
-  if (!email || !email.includes("@")) {
-    return NextResponse.json({ error: "Introduce un email válido." }, { status: 400 });
+  if (telefono.length < 9) {
+    return NextResponse.json(
+      { error: "Introduce un número de teléfono válido." },
+      { status: 400 }
+    );
   }
   if (password.length < 6) {
     return NextResponse.json(
@@ -27,39 +27,43 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (nombresPatinadores.length === 0) {
+
+  const supabase = supabaseAdmin();
+
+  // Buscamos a qué patinador/es corresponde este teléfono: el mismo que
+  // las familias ya usan para entrar en Klubber. Un mismo teléfono puede
+  // tener más de un patinador/a (hermanos en el club).
+  const { data: roster, error: rosterError } = await supabase
+    .from("patinadores")
+    .select("nombre, grupo, telefono");
+
+  if (rosterError) {
+    return NextResponse.json({ error: rosterError.message }, { status: 500 });
+  }
+
+  const propios = (roster || []).filter(
+    (r) => r.telefono && normalizaTelefono(r.telefono) === telefono
+  );
+
+  if (propios.length === 0) {
     return NextResponse.json(
-      { error: "Indica el nombre de al menos un patinador/a." },
+      {
+        error:
+          "No encontramos ese número en el listado del club. Comprueba que sea el mismo que usas en Klubber, o contacta con el club si crees que es un error.",
+      },
       { status: 400 }
     );
   }
 
-  const supabase = supabaseAdmin();
-
-  // No exigimos que el nombre esté en el listado de Klubber: cualquiera
-  // puede registrarse con el nombre que escriba. Si ese nombre coincide
-  // con el listado subido desde /admin, aprovechamos para guardar también
-  // su grupo (útil de cara al futuro); si no coincide o no se ha subido
-  // ningún listado todavía, no pasa nada, se guarda tal cual lo escribió.
-  const { data: roster } = await supabase.from("patinadores").select("nombre, grupo");
-
-  const patinadoresValidados: { nombre: string; grupo: string | null }[] =
-    nombresPatinadores.map((nombreEscrito) => {
-      const match = roster?.find((r) => normaliza(r.nombre) === normaliza(nombreEscrito));
-      return match
-        ? { nombre: match.nombre, grupo: match.grupo }
-        : { nombre: nombreEscrito, grupo: null };
-    });
-
   const { data: existente } = await supabase
     .from("padres")
     .select("id")
-    .ilike("email", email)
+    .eq("telefono", telefono)
     .maybeSingle();
 
   if (existente) {
     return NextResponse.json(
-      { error: "Ya existe una cuenta con ese email. Prueba a iniciar sesión." },
+      { error: "Ya existe una cuenta con ese teléfono. Prueba a iniciar sesión." },
       { status: 400 }
     );
   }
@@ -67,9 +71,9 @@ export async function POST(req: NextRequest) {
   const token = generarTokenSesion();
 
   const { error: insError } = await supabase.from("padres").insert({
-    email,
+    telefono,
     password_hash: hashPassword(password),
-    patinadores: patinadoresValidados,
+    patinadores: propios.map((p) => ({ nombre: p.nombre, grupo: p.grupo })),
     sesion_token: token,
   });
 
@@ -77,7 +81,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: insError.message }, { status: 500 });
   }
 
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({
+    ok: true,
+    patinadores: propios.map((p) => p.nombre),
+  });
   res.cookies.set("flip_sesion", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

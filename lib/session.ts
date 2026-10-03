@@ -3,7 +3,7 @@ import { supabaseAdmin, supabaseConfigured } from "./supabase";
 
 export type Padre = {
   id: string;
-  email: string;
+  telefono: string;
   patinadores: { nombre: string; grupo: string | null }[];
 };
 
@@ -16,7 +16,7 @@ export async function getPadreDeSesion(req: NextRequest): Promise<Padre | null> 
   const supabase = supabaseAdmin();
   const { data } = await supabase
     .from("padres")
-    .select("id, email, patinadores")
+    .select("id, telefono, patinadores")
     .eq("sesion_token", token)
     .maybeSingle();
 

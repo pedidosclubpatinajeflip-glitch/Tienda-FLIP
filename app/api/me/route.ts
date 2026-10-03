@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "No has iniciado sesión." }, { status: 401 });
   }
   return NextResponse.json({
-    email: padre.email,
+    telefono: padre.telefono,
     patinadores: padre.patinadores,
   });
 }

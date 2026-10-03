@@ -11,7 +11,7 @@ type PatinadorPropio = { nombre: string; grupo: string | null };
 export default function TiendaPage() {
   const router = useRouter();
   const [cargandoSesion, setCargandoSesion] = useState(true);
-  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [patinadores, setPatinadores] = useState<PatinadorPropio[]>([]);
   const [patinadorNombre, setPatinadorNombre] = useState("");
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
@@ -29,7 +29,7 @@ export default function TiendaPage() {
       })
       .then((data) => {
         if (!data) return;
-        setEmail(data.email);
+        setTelefono(data.telefono);
         setPatinadores(data.patinadores || []);
         if (data.patinadores?.length === 1) {
           setPatinadorNombre(data.patinadores[0].nombre);
@@ -93,7 +93,7 @@ export default function TiendaPage() {
           onClick={cerrarSesion}
           className="absolute top-4 right-4 text-xs text-white/60 hover:text-white underline"
         >
-          Cerrar sesión ({email})
+          Cerrar sesión ({telefono})
         </button>
         <p className="uppercase tracking-[0.3em] text-xs text-[var(--flip-pink)] mb-2">
           Temporada 2026-2027

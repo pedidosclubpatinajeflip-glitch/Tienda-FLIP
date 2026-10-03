@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("patinadores")
-    .select("id, nombre, grupo")
+    .select("id, nombre, grupo, telefono")
     .order("nombre", { ascending: true });
 
   if (error) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const filas: { nombre: string; grupo?: string; tutor?: string; email?: string }[] =
+  const filas: { nombre: string; grupo?: string; tutor?: string; telefono?: string; email?: string }[] =
     body.patinadores || [];
 
   if (!Array.isArray(filas) || filas.length === 0) {
@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
       nombre: f.nombre,
       grupo: f.grupo || null,
       tutor: f.tutor || null,
+      telefono: f.telefono || null,
       email: f.email || null,
     })),
     { count: "exact" }

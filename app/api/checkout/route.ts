@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const patinador = patinadorDelPadre.nombre;
     const grupo = patinadorDelPadre.grupo || undefined;
-    const contacto = padre.email;
+    const contacto = padre.telefono;
 
     if (!items || items.length === 0) {
       return NextResponse.json(
